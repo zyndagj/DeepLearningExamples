@@ -147,14 +147,15 @@ class PerformanceCallback(BaseCallback):
 
     def process_performance_stats(self):
         timestamps = np.asarray(self.timestamps)
+        print(timestamps)
         deltas = np.diff(timestamps)
         throughput = (self.batch_size / deltas).mean()
         stats = {
-            f"throughput_{self.mode}": throughput,
-            f"latency_{self.mode}_mean": deltas.mean(),
-            f"total_time_{self.mode}": timestamps[-1] - timestamps[0],
+            f"throughput_{self.mode} (inputs/sec)": throughput,
+            f"latency_{self.mode}_mean (sec/batch)": deltas.mean(),
+            f"total_time_{self.mode} (seconds)": timestamps[-1] - timestamps[0],
         }
         for level in [90, 95, 99]:
-            stats.update({f"latency_{self.mode}_{level}": np.percentile(deltas, level)})
+            stats.update({f"latency_{self.mode}_{level} (sec/batch)": np.percentile(deltas, level)})
 
         return stats

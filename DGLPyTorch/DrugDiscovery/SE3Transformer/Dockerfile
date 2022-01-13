@@ -51,6 +51,7 @@ RUN cd dgl/python && python setup.py install && cd ../.. && rm -rf dgl
 ADD requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 ADD . .
+RUN chmod -R a+rwX .
 
 ENV DGLBACKEND=pytorch
 ENV OMP_NUM_THREADS=1
