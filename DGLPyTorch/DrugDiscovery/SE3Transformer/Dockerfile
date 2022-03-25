@@ -29,24 +29,25 @@ ARG FROM_IMAGE_NAME=nvcr.io/nvidia/pytorch:21.07-py3
 FROM ${FROM_IMAGE_NAME} AS dgl_builder
 
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update \
-    && apt-get install -y git build-essential python3-dev make cmake \
-    && rm -rf /var/lib/apt/lists/*
+#RUN apt-get update \
+#    && apt-get install -y git build-essential python3-dev make cmake \
+#    && rm -rf /var/lib/apt/lists/*
 WORKDIR /dgl
 RUN git clone --branch v0.7.0 --recurse-submodules --depth 1 https://github.com/dmlc/dgl.git .
 RUN sed -i 's/"35 50 60 70"/"60 70 80"/g' cmake/modules/CUDA.cmake
 WORKDIR build
 RUN cmake -DUSE_CUDA=ON -DUSE_FP16=ON ..
 RUN make -j8
-
+WORKDIR /dgl/python
+RUN python setup.py bdist_wheel
 
 FROM ${FROM_IMAGE_NAME}
 
 WORKDIR /workspace/se3-transformer
 
 # copy built DGL and install it
-COPY --from=dgl_builder /dgl ./dgl
-RUN cd dgl/python && python setup.py install && cd ../.. && rm -rf dgl
+COPY --from=dgl_builder /dgl/python/dist/dgl-0.7.0-cp38-cp38-linux_x86_64.whl ./dgl/dgl-0.7.0-cp38-cp38-linux_x86_64.whl
+RUN pip install dgl/dgl-0.7.0-cp38-cp38-linux_x86_64.whl && rm -rf dgl
 
 ADD requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
@@ -55,5 +56,3 @@ RUN chmod -R a+rwX .
 
 ENV DGLBACKEND=pytorch
 ENV OMP_NUM_THREADS=1
-
-
