@@ -151,11 +151,11 @@ class PerformanceCallback(BaseCallback):
         deltas = np.diff(timestamps)
         throughput = (self.batch_size / deltas).mean()
         stats = {
-            f"throughput_{self.mode} (inputs/sec)": throughput,
-            f"latency_{self.mode}_mean (sec/batch)": deltas.mean(),
-            f"total_time_{self.mode} (seconds)": timestamps[-1] - timestamps[0],
+            f"throughput_{self.mode} (inputs/ms)": throughput,
+            f"latency_{self.mode}_mean (ms/batch)": deltas.mean(),
+            f"total_time_{self.mode} (ms)": timestamps[-1] - timestamps[0],
         }
         for level in [90, 95, 99]:
-            stats.update({f"latency_{self.mode}_{level} (sec/batch)": np.percentile(deltas, level)})
+            stats.update({f"latency_{self.mode}_{level} (ms/batch)": np.percentile(deltas, level)})
 
         return stats
